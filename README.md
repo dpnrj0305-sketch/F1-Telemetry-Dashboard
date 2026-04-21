@@ -1,255 +1,270 @@
-# F1 Telemetry & AI Race Engineer Dashboard
+# FastAPI Backend - F1 Telemetry & AI Race Engineer Dashboard
 
-> An MVP dashboard for F1 telemetry visualization and AI-powered race engineer analysis
+## Overview
 
-## 🌟 Features
+This is the FastAPI backend service for the F1 Telemetry Dashboard. It provides REST APIs for:
+- Loading F1 telemetry data via FastF1 library
+- Generating AI-powered race engineer analysis
+- Managing database operations
+- Serving CORS-enabled endpoints to the frontend
 
-- **Real-time Telemetry Visualization**: Interactive charts displaying speed, throttle, brake, RPM, and gear data
-- **FastF1 Integration**: Load telemetry data from historical and current F1 seasons
-- **AI Race Engineer Analysis**: ChatGPT/Gemini-powered driver comparison and insights
-- **PostgreSQL Backend**: Persistent storage for sessions and analyses
-- **Responsive UI**: Modern Tailwind CSS styling with Recharts visualizations
-
-## 🏗️ Tech Stack
-
-- **Frontend**: Next.js/React 18, Recharts, Tailwind CSS
-- **Backend**: FastAPI (Python), SQLAlchemy ORM
-- **Database**: PostgreSQL
-- **Data Processing**: FastF1, Pandas, NumPy
-- **AI Integration**: OpenAI GPT-4, Google Gemini
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-f1-telemetry-dashboard/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── TelemetryChart.jsx
-│   │   │   ├── AIDriverSummary.jsx
-│   │   │   ├── SessionSelector.jsx
-│   │   │   └── index.js
-│   │   ├── services/
-│   │   │   └── api.js
-│   │   ├── App.jsx
-│   │   └── index.js
-│   ├── public/
-│   ├── package.json
-│   ├── .env.example
-│   └── tailwind.config.js
-├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── api/
-│   │   │   ├── routes_telemetry.py
-│   │   │   └── routes_ai.py
-│   │   ├── services/
-│   │   │   ├── fastf1_client.py
-│   │   │   └── llm_engineer.py
-│   │   └── database/
-│   │       ├── connection.py
-│   │       └── models.py
-│   ├── requirements.txt
-│   ├── .env.example
-│   └── README.md
-├── database/
-│   └── schema.sql
-└── README.md
+backend/
+├── app/
+│   ├── main.py                 # FastAPI application initialization
+│   ├── api/
+│   │   ├── routes_telemetry.py # Telemetry data endpoints
+│   │   └── routes_ai.py        # AI analysis endpoints
+│   ├── services/
+│   │   ├── fastf1_client.py    # FastF1 data loading
+│   │   └── llm_engineer.py     # AI analysis generation
+│   └── database/
+│       ├── connection.py       # PostgreSQL connection setup
+│       └── models.py           # SQLAlchemy ORM models
+├── requirements.txt            # Python dependencies
+├── .env.example               # Environment variables template
+└── README.md                  # This file
 ```
 
-## 🚀 Quick Start
+## Setup Instructions
 
-### Prerequisites
+### 1. Create Virtual Environment
 
-- Python 3.10+
-- Node.js 18+
-- PostgreSQL 12+
-- Git
+**Windows (PowerShell):**
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
 
-### Backend Setup
+**macOS/Linux:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
 
-1. **Create Virtual Environment** (Windows/PowerShell):
-   ```powershell
-   cd backend
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-   ```
+### 2. Install Dependencies
 
-2. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-3. **Configure Database**:
-   - Create PostgreSQL database: `createdb f1_telemetry`
-   - Copy `.env.example` to `.env` and configure database credentials
-   - Initialize schema: `psql -U postgres -d f1_telemetry -f ../database/schema.sql`
+### 3. Configure Environment
 
-4. **Set API Keys** (in `.env`):
-   ```
-   OPENAI_API_KEY=your_key_here
-   # or
-   GEMINI_API_KEY=your_key_here
-   ```
+```bash
+# Copy environment template
+copy .env.example .env
 
-5. **Run Backend**:
-   ```bash
-   python -m uvicorn app.main:app --reload
-   ```
-   Backend runs at `http://localhost:8000`
+# Edit .env with your configuration
+```
 
-### Frontend Setup
+**Required Configuration:**
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_NAME=f1_telemetry
+OPENAI_API_KEY=your_key  (or GEMINI_API_KEY)
+```
 
-1. **Install Dependencies**:
-   ```bash
-   cd frontend
-   npm install
-   ```
+### 4. Initialize Database
 
-2. **Configure Environment**:
-   - Copy `.env.example` to `.env.local`
-   - Ensure `REACT_APP_API_URL=http://localhost:8000/api`
+```bash
+# Create PostgreSQL database
+createdb f1_telemetry
 
-3. **Run Development Server**:
-   ```bash
-   npm start
-   ```
-   Frontend runs at `http://localhost:3000`
+# Initialize schema
+psql -U postgres -d f1_telemetry -f ../database/schema.sql
+```
 
-## 📖 API Endpoints
+### 5. Run Backend Server
 
-### Telemetry Endpoints
-- `GET /api/telemetry/session/{year}/{event}/{session_type}` - Get session telemetry
-- `GET /api/telemetry/driver/{driver_number}/lap/{lap_number}` - Get specific lap data
-- `GET /api/telemetry/compare?driver_a=X&driver_b=Y` - Compare two drivers
+```bash
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-### AI Endpoints
+Backend will be available at: `http://localhost:8000`
+
+## API Documentation
+
+Once running, visit:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+## Available Endpoints
+
+### Health Check
+- `GET /health` - Server status check
+
+### Telemetry
+- `GET /api/telemetry/session/{year}/{event}/{session_type}` - Load session data
+- `GET /api/telemetry/driver/{driver_number}/lap/{lap_number}` - Get specific lap
+- `GET /api/telemetry/compare?driver_a=X&driver_b=Y` - Compare drivers
+
+### AI Analysis
 - `POST /api/ai/analyze` - Generate race engineer analysis
-- `POST /api/ai/compare-telemetry` - Compare telemetry using AI
+- `POST /api/ai/compare-telemetry` - AI-powered telemetry comparison
 - `GET /api/ai/analysis-history/{driver_number}` - Get analysis history
 - `GET /api/ai/insights/{year}/{event}` - Get event insights
 
-## 🎛️ Configuration
+## Environment Variables
 
-### Backend Environment Variables
-See `backend/.env.example` for all available configuration options.
+### Database (Required)
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_NAME=f1_telemetry
+```
 
-Key variables:
-- `DB_*` - PostgreSQL connection settings
-- `OPENAI_API_KEY` / `GEMINI_API_KEY` - LLM API credentials
-- `ACTIVE_LLM_PROVIDER` - Choose between `openai` or `gemini`
-- `DEBUG` - Enable debug logging
+### LLM Configuration
+Choose one LLM provider:
 
-### Frontend Environment Variables
-See `frontend/.env.example` for configuration.
+**OpenAI:**
+```
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4
+ACTIVE_LLM_PROVIDER=openai
+```
 
-## 🔧 Development
+**Google Gemini:**
+```
+GEMINI_API_KEY=...
+GEMINI_MODEL=gemini-pro
+ACTIVE_LLM_PROVIDER=gemini
+```
 
-### Running Tests (Backend)
+### Optional
+```
+API_HOST=0.0.0.0
+API_PORT=8000
+DEBUG=False
+LOG_LEVEL=INFO
+FRONTEND_URL=http://localhost:3000
+```
+
+## Key Dependencies
+
+- **FastAPI** - Modern async web framework
+- **Uvicorn** - ASGI server
+- **SQLAlchemy** - ORM for database operations
+- **psycopg2** - PostgreSQL adapter
+- **FastF1** - F1 telemetry data library
+- **OpenAI / Google Generativeai** - LLM APIs
+- **Pydantic** - Data validation
+
+## Development
+
+### Running Tests
 ```bash
-cd backend
 pytest
 ```
 
 ### Code Quality
 ```bash
-# Backend
+# Linting
 pylint app/
+
+# Formatting
 black app/
 
-# Frontend
-npm run lint
-npm run format
+# Type checking
+mypy app/
 ```
 
-## 📊 Database Schema
+### Hot Reload
+The server runs with `--reload` flag, which auto-restarts on code changes.
 
-### Tables
-- `users` - Dashboard users
-- `saved_sessions` - Saved F1 sessions
-- `ai_analyses` - Generated AI analyses
-- `telemetries` - Raw telemetry data storage
-- `favorites` - User favorite analyses
-- `comments` - Analysis annotations
+## Common Issues
 
-## 🤖 AI Integration
+### "ModuleNotFoundError: No module named 'fastapi'"
+- Activate virtual environment: `.\venv\Scripts\Activate.ps1`
+- Reinstall dependencies: `pip install -r requirements.txt`
 
-The dashboard supports two LLM providers:
+### "psycopg2.OperationalError: could not connect to server"
+- Check PostgreSQL is running
+- Verify DB credentials in `.env`
+- Try creating database: `createdb f1_telemetry`
 
-### OpenAI (Recommended)
-1. Get API key from https://platform.openai.com/api-keys
-2. Set `OPENAI_API_KEY` in `.env`
-3. Set `ACTIVE_LLM_PROVIDER=openai`
-
-### Google Gemini
-1. Get API key from https://makersuite.google.com/app/apikey
-2. Set `GEMINI_API_KEY` in `.env`
-3. Set `ACTIVE_LLM_PROVIDER=gemini`
-
-## 🐳 Docker Deployment (Future)
-
-```bash
-docker-compose up -d
-```
-
-## 📝 Common Issues
-
-### Backend Connection Error
-- Ensure PostgreSQL is running
-- Verify database credentials in `.env`
-- Check database exists: `psql -l`
+### "OpenAI API Error"
+- Verify API key in `.env`
+- Check your OpenAI account has credits
+- Ensure key has correct permissions
 
 ### CORS Errors
-- Verify frontend URL in `CORS_ORIGINS` in backend `.env`
-- Ensure backend is running on port 8000
+- Frontend URL must be in CORS allowed origins
+- Edit `main.py` to add your frontend URL if needed
 
-### Module Not Found (Python)
-- Activate virtual environment
-- Reinstall requirements: `pip install -r requirements.txt --upgrade`
+## Performance Tips
 
-### API Not Responding
-- Check backend logs for errors
-- Verify `REACT_APP_API_URL` in frontend `.env.local`
+1. **Enable Query Caching** (FastF1):
+   ```python
+   import fastf1
+   fastf1.Cache.enable_cache('./cache')
+   ```
 
-## 🚦 Roadmap
+2. **Use Async Database Queries**:
+   - Already implemented in route handlers
 
-- [ ] User authentication & authorization
-- [ ] Real-time telemetry streaming
-- [ ] Advanced filtering & comparison tools
-- [ ] Session sharing & collaboration
-- [ ] Mobile-responsive design improvements
-- [ ] Docker containerization
-- [ ] CI/CD pipeline
-- [ ] Performance optimization
-- [ ] Interactive telemetry data export
+3. **Database Indexing**:
+   - Indexes created in `schema.sql`
 
-## 📝 License
+## Security
 
-MIT License - See LICENSE file for details
+⚠️ **Important**: This is an MVP. For production:
+- [ ] Add user authentication (JWT)
+- [ ] Validate all inputs
+- [ ] Use environment secrets manager
+- [ ] Add rate limiting
+- [ ] Enable HTTPS
+- [ ] Add API key authentication
+- [ ] Implement request logging
+- [ ] Add query sanitization
 
-## 🤝 Contributing
+## Deployment
 
-Contributions are welcome! Please follow these steps:
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### Production Checklist
+- [ ] Set `DEBUG=False`
+- [ ] Use production ASGI server (Gunicorn + Uvicorn)
+- [ ] PostgreSQL on separate server
+- [ ] Configure environment variables securely
+- [ ] Set up reverse proxy (Nginx)
+- [ ] Enable CORS properly
+- [ ] Add SSL/TLS certificates
+- [ ] Set up monitoring/logging
 
-## 💬 Support
+### Docker
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY app/ app/
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0"]
+```
 
-For issues and questions:
-- Open an GitHub Issue
-- Check existing documentation
-- Review API documentation at `/api/docs` (backend)
+## Future Enhancements
 
-## 🙏 Acknowledgments
+- [ ] WebSocket support for real-time data
+- [ ] Caching layer (Redis)
+- [ ] GraphQL API option
+- [ ] Advanced telemetry filtering
+- [ ] Batch analysis processing
+- [ ] User authentication system
+- [ ] Webhook support
+- [ ] Rate limiting & throttling
 
-- FastF1 library for F1 telemetry data
-- Recharts for visualization
-- FastAPI for backend framework
-- React & Next.js for frontend
+## Support
+
+For issues:
+1. Check error logs
+2. Review API documentation at `/docs`
+3. Verify configuration in `.env`
+4. Check backend logs in terminal
 
 ---
 
-**Happy Racing! 🏁**
+**Backend Service Ready!** 🚀
